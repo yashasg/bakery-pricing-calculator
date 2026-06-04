@@ -1,6 +1,0 @@
-git_url("")
-storage_mode("git")
-type("appstore")
-app_identifier(["com.yashasg.bakery-pricing-calculator"])
-username("")
-readonly(true)
