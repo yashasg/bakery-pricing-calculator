@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "000000000000000000000401"
-               BuildableName = "__APP_NAME__.app"
-               BlueprintName = "__APP_NAME__"
+               BuildableName = "BakeryPricingCalculator.app"
+               BlueprintName = "BakeryPricingCalculator"
                ReferencedContainer = "container:app.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -30,8 +30,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "000000000000000000000402"
-               BuildableName = "__APP_NAME__Tests.xctest"
-               BlueprintName = "__APP_NAME__Tests"
+               BuildableName = "BakeryPricingCalculatorTests.xctest"
+               BlueprintName = "BakeryPricingCalculatorTests"
                ReferencedContainer = "container:app.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -44,8 +44,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "000000000000000000000403"
-               BuildableName = "__APP_NAME__UITests.xctest"
-               BlueprintName = "__APP_NAME__UITests"
+               BuildableName = "BakeryPricingCalculatorUITests.xctest"
+               BlueprintName = "BakeryPricingCalculatorUITests"
                ReferencedContainer = "container:app.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -64,8 +64,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "000000000000000000000402"
-               BuildableName = "__APP_NAME__Tests.xctest"
-               BlueprintName = "__APP_NAME__Tests"
+               BuildableName = "BakeryPricingCalculatorTests.xctest"
+               BlueprintName = "BakeryPricingCalculatorTests"
                ReferencedContainer = "container:app.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -75,8 +75,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "000000000000000000000403"
-               BuildableName = "__APP_NAME__UITests.xctest"
-               BlueprintName = "__APP_NAME__UITests"
+               BuildableName = "BakeryPricingCalculatorUITests.xctest"
+               BlueprintName = "BakeryPricingCalculatorUITests"
                ReferencedContainer = "container:app.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -85,8 +85,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "000000000000000000000401"
-            BuildableName = "__APP_NAME__.app"
-            BlueprintName = "__APP_NAME__"
+            BuildableName = "BakeryPricingCalculator.app"
+            BlueprintName = "BakeryPricingCalculator"
             ReferencedContainer = "container:app.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -106,8 +106,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "000000000000000000000401"
-            BuildableName = "__APP_NAME__.app"
-            BlueprintName = "__APP_NAME__"
+            BuildableName = "BakeryPricingCalculator.app"
+            BlueprintName = "BakeryPricingCalculator"
             ReferencedContainer = "container:app.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -123,8 +123,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "000000000000000000000401"
-            BuildableName = "__APP_NAME__.app"
-            BlueprintName = "__APP_NAME__"
+            BuildableName = "BakeryPricingCalculator.app"
+            BlueprintName = "BakeryPricingCalculator"
             ReferencedContainer = "container:app.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

@@ -90,7 +90,7 @@ cannot instantiate it in tests. Any subscriber that depends directly on
 
 ## Applied example
 
-Successfully used in `app/__APP_NAME__Tests/MetricKitSubscriberTests.swift`
+Successfully used in `app/BakeryPricingCalculatorTests/MetricKitSubscriberTests.swift`
 (2026-05-20T19:26:30-07:00). Edison's `MetricPayloadProtocol` had a third method
 `func jsonRepresentation() -> Data` beyond the two timestamp fields in this spec.
 Key lesson: **check the actual protocol surface before writing the mock** — the

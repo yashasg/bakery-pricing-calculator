@@ -2,10 +2,10 @@
 configured: false
 interval: 1
 timeout: 30
-description: "__APP_NAME__ — iOS app build loop"
+description: "BakeryPricingCalculator — iOS app build loop"
 ---
 
-# Squad Work Loop — __APP_NAME__ iOS
+# Squad Work Loop — BakeryPricingCalculator iOS
 
 ## Model defaults
 

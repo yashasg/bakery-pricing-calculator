@@ -9,9 +9,9 @@ A reusable starter template for iOS apps built with SwiftUI and distributed via 
 | Path | Purpose |
 |------|---------|
 | `app/app.xcodeproj` | Xcode project with app, unit test, and UI test targets |
-| `app/__APP_NAME__/` | SwiftUI source skeleton (renamed by `bootstrap.sh`) |
-| `app/__APP_NAME__Tests/` | Unit test target with sample XCTest |
-| `app/__APP_NAME__UITests/` | UI test target with accessibility audit |
+| `app/BakeryPricingCalculator/` | SwiftUI source skeleton (renamed by `bootstrap.sh`) |
+| `app/BakeryPricingCalculatorTests/` | Unit test target with sample XCTest |
+| `app/BakeryPricingCalculatorUITests/` | UI test target with accessibility audit |
 | `app/fastlane/Fastfile` | Full lane suite: `ci`, `build`, `test`, `certs`, `beta`, `release` |
 | `app/fastlane/Appfile` | App identity placeholders (`app_identifier`, `apple_id`, `team_id`) |
 | `app/fastlane/Matchfile` | Cert-sync placeholders (`git_url`, `username`) |
@@ -76,7 +76,7 @@ cd <your-repo>
 
 **App Store display name is out of scope for bootstrap** — it is configured separately in App Store Connect or via fastlane (e.g. `deliver`/`metadata`). `CFBundleDisplayName` in `Info.plist` defaults to `$(PRODUCT_NAME)` (the Xcode target name).
 
-What it does: renames all `__APP_NAME__` directories, files, and tokens; replaces `__BUNDLE_ID__`; sets the board URL in `loop.sh`; then **self-deletes**. Do not run it twice.
+What it does: renames all `BakeryPricingCalculator` directories, files, and tokens; replaces `com.yashasg.bakery-pricing-calculator`; sets the board URL in `loop.sh`; then **self-deletes**. Do not run it twice.
 
 ### 3. Install Ruby dependencies
 
@@ -182,7 +182,7 @@ bundle install
 Fill in `app/fastlane/Appfile` with your real values:
 
 ```ruby
-app_identifier("__BUNDLE_ID__")  # e.g. com.acme.myapp
+app_identifier("com.yashasg.bakery-pricing-calculator")  # e.g. com.acme.myapp
 apple_id("you@example.com")      # Apple ID for App Store Connect
 team_id("XXXXXXXXXX")            # 10-character Apple Developer team ID
 ```
@@ -217,7 +217,7 @@ Fill in `app/fastlane/Matchfile` pointing to a **private** Git repository that w
 git_url("https://gitlab.com/your-org/match-certs.git")
 storage_mode("git")
 type("appstore")
-app_identifier(["__BUNDLE_ID__"])
+app_identifier(["com.yashasg.bakery-pricing-calculator"])
 username("you@example.com")
 readonly(false)  # set true after first run
 ```
@@ -269,7 +269,7 @@ These lanes run locally as described above. Automated CI/CD runs on **GitHub Act
 
 > **Architecture:** GitLab is the code repository (`origin`). GitHub is the CI/CD runner, triggered by a GitLab→GitHub webhook. Bootstrap automatically creates the companion public GitHub repo (same name as this repo) and registers it as a remote named `github`.
 
-**GitHub CI/CD repo (Actions runner):** `__GITHUB_CI_REPO_URL__`
+**GitHub CI/CD repo (Actions runner):** `https://github.com/yashasg/bakery-pricing-calculator`
 
 To skip automatic repo creation: pass `--no-github` to `bootstrap.sh`, or set `SKIP_GITHUB=1` in the environment. Requires [`gh`](https://cli.github.com/) authenticated (`brew install gh && gh auth login`).
 
@@ -361,5 +361,5 @@ Full command reference → `.squad/skills/glab/SKILL.md`.
 | `error: no available simulator named 'iPhone 17 Pro'` | Either install that simulator in Xcode → Platforms, or override: `SIMULATOR_NAME="iPhone 16" ./app/build.sh test`. |
 | `fastlane ci` fails on `swiftlint` | Install SwiftLint (`brew install swiftlint`) and add a `.swiftlint.yml`, or remove the `swiftlint(...)` call from the `ci` lane in `app/fastlane/Fastfile`. |
 | `match` errors: `git_url is empty` | Fill in `git_url(...)` and `username(...)` in `app/fastlane/Matchfile` before running `fastlane certs` / `beta` / `release`. |
-| `UI.user_error! Unable to read app_identifier` | `app/fastlane/Appfile` still has the `__BUNDLE_ID__` placeholder — run `bundle exec fastlane beta` only after bootstrap and filling in real values. |
+| `UI.user_error! Unable to read app_identifier` | `app/fastlane/Appfile` still has the `com.yashasg.bakery-pricing-calculator` placeholder — run `bundle exec fastlane beta` only after bootstrap and filling in real values. |
 | `ASC_API_KEY_JSON` not set | Place `asc_api_key.json` at `app/fastlane/asc_api_key.json` or export `ASC_API_KEY_JSON`. See `docs/app-store-connect-privacy-setup.md`. |

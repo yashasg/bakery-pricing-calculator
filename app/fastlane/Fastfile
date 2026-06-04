@@ -27,8 +27,8 @@ default_platform(:ios)
 # - Signing: MATCH_PASSWORD, MATCH_KEYCHAIN_PASSWORD, optional WWDR_CERT_PATH
 APP_PROJECT = File.expand_path("../app.xcodeproj", __dir__)
 APPFILE_PATH = File.expand_path("Appfile", __dir__)
-APP_TARGET = "__APP_NAME__"
-APP_SCHEME = "__APP_NAME__"
+APP_TARGET = "BakeryPricingCalculator"
+APP_SCHEME = "BakeryPricingCalculator"
 BUILD_OUTPUT_DIRECTORY = "."
 BUILD_LOG_PATH = "../.build/gym"
 CI_KEYCHAIN_NAME = "fastlane_tmp_keychain"
@@ -168,7 +168,7 @@ platform :ios do
 
   desc "Run scheme-defined XCTest suite without distribution (CD gate: UI tests excluded; see issue #45)"
   lane :test do |options|
-    run_tests(**lane_test_options(options).merge(skip_testing: ["__APP_NAME__UITests"]))
+    run_tests(**lane_test_options(options).merge(skip_testing: ["BakeryPricingCalculatorUITests"]))
   end
 
   private_lane :ensure_release_configuration_matches do

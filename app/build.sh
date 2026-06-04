@@ -245,7 +245,7 @@ foreign_app_preflight() {
     printf '%s' "$listapps_raw" \
       | /usr/bin/awk -F '"' '/CFBundleIdentifier =/ { print $2 }' \
       | grep -E "^${BUNDLE_ID_PREFIX:-com\.example}\." \
-      | grep -v "^${BUNDLE_ID:-__BUNDLE_ID__}$" \
+      | grep -v "^${BUNDLE_ID:-com.yashasg.bakery-pricing-calculator}$" \
       || true
   )"
   [[ -n "$foreign_bundle_ids" ]] || return 0

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct __APP_NAME__App: App {
+struct BakeryPricingCalculatorApp: App {
     var body: some Scene {
         WindowGroup {
             // Satoshi is set as the default font for all views in this window.

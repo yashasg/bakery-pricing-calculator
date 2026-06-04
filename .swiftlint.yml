@@ -15,16 +15,16 @@
 #   • Swift coding standards (§2–§3)       → docs/swift_coding_standards.md
 #   • SwiftLint rule docs                  → https://realm.github.io/SwiftLint/
 #
-# Bootstrap note: __APP_NAME__ tokens below are replaced by bootstrap.sh when
+# Bootstrap note: BakeryPricingCalculator tokens below are replaced by bootstrap.sh when
 # the template is initialized; do not substitute them manually.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Scope ─────────────────────────────────────────────────────────────────────
 
 included:
-  - app/__APP_NAME__
-  - app/__APP_NAME__Tests
-  - app/__APP_NAME__UITests
+  - app/BakeryPricingCalculator
+  - app/BakeryPricingCalculatorTests
+  - app/BakeryPricingCalculatorUITests
 
 excluded:
   - prototype
@@ -182,7 +182,7 @@ multiline_arguments:
 vertical_parameter_alignment_on_call:
   severity: warning
 
-# Allow underscores so template tokens like __APP_NAME__App are not flagged as
+# Allow underscores so template tokens like BakeryPricingCalculatorApp are not flagged as
 # type-name violations before bootstrap.sh replaces them with the real name.
 type_name:
   allowed_symbols: ["_"]

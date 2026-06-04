@@ -15,9 +15,9 @@ Use this when an iOS app's `.xcodeproj` bundle path changes but the product, tar
 - Validate with `bash -n` for scripts, `xcodebuild -list -project <path>` for project readability, and the repo's existing build/test command when practical.
 
 ## Examples
-- Canonical project path: `app/__APP_NAME__.xcodeproj`
-- Preserved scheme: `__APP_NAME__`
-- Build invocation pattern: `xcodebuild -project app/__APP_NAME__.xcodeproj -scheme __APP_NAME__ ...`
+- Canonical project path: `app/BakeryPricingCalculator.xcodeproj`
+- Preserved scheme: `BakeryPricingCalculator`
+- Build invocation pattern: `xcodebuild -project app/BakeryPricingCalculator.xcodeproj -scheme BakeryPricingCalculator ...`
 
 ## Anti-Patterns
 - Renaming schemes or targets just because the `.xcodeproj` bundle was renamed.

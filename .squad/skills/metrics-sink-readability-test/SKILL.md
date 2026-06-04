@@ -51,7 +51,7 @@ aggregation backend (usually out of scope for privacy reasons).
    export exists.
 5. Document the gap in the decision record so it is not silently forgotten.
 
-### Example classification (__APP_NAME__ issue #9)
+### Example classification (BakeryPricingCalculator issue #9)
 
 | Signal | Class | Meaningful without persistent store? |
 |---|---|---|

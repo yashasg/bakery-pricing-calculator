@@ -55,7 +55,7 @@ Connect only. `NSPrivacyTracking` must be `false`.
 ### 4. File location
 
 ```
-app/__APP_NAME__/PrivacyInfo.xcprivacy
+app/BakeryPricingCalculator/PrivacyInfo.xcprivacy
 ```
 
 The file must be added to the app target's **Resources** build phase in Xcode. Without

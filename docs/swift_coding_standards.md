@@ -1,4 +1,4 @@
-# Swift Coding Standards — __APP_NAME__
+# Swift Coding Standards — BakeryPricingCalculator
 
 **Status:** Binding on all Swift code in this repository.
 **Owner:** Tesla (loop lead). Authored 2026-05-20 in response to GitLab issue #8.
@@ -14,7 +14,7 @@ We do not vendor a copy here because:
   since 2019.
 - Bundling a snapshot in this repository creates a drift risk against the
   upstream document.
-- The artefact attached to issue #8 (\<https://gitlab.com/[your-username]/__APP_NAME__/uploads/abd2eeafc861cf5507274e7b6a1f4f0c/google_swift_coding_style.md\>)
+- The artefact attached to issue #8 (\<https://gitlab.com/[your-username]/BakeryPricingCalculator/uploads/abd2eeafc861cf5507274e7b6a1f4f0c/google_swift_coding_style.md\>)
   is behind Cloudflare bot protection and cannot be fetched from automation;
   the GitLab API resolves the same secret to 404. The canonical URL above is
   the equivalent material and is reachable.
@@ -114,7 +114,7 @@ a private `init` for pure-function namespaces. Already established in
 
 ### 2.9 Tests
 
-- Unit tests live in `app/__APP_NAME__Tests/` and use Apple's
+- Unit tests live in `app/BakeryPricingCalculatorTests/` and use Apple's
   Swift Testing framework (`@Test`, `#expect`). XCTest is acceptable for UI
   tests only.
 - UI tests run **serially** (per the 2026-05-20T06-25 decision) to avoid

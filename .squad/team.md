@@ -1,6 +1,6 @@
 # Squad Team
 
-> __APP_NAME__
+> BakeryPricingCalculator
 
 ## Coordinator
 
@@ -15,5 +15,5 @@
 
 ## Project Context
 
-- **Project:** __APP_NAME__
+- **Project:** BakeryPricingCalculator
 - **Created:** <!-- fill in when bootstrapped -->

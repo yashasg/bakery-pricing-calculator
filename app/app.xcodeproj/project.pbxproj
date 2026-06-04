@@ -12,21 +12,21 @@ isa = PBXContainerItemProxy;
 containerPortal = 000000000000000000000301 /* Project object */;
 proxyType = 1;
 remoteGlobalIDString = 000000000000000000000401;
-remoteInfo = __APP_NAME__;
+remoteInfo = BakeryPricingCalculator;
 };
 000000000000000000000202 /* PBXContainerItemProxy */ = {
 isa = PBXContainerItemProxy;
 containerPortal = 000000000000000000000301 /* Project object */;
 proxyType = 1;
 remoteGlobalIDString = 000000000000000000000401;
-remoteInfo = __APP_NAME__;
+remoteInfo = BakeryPricingCalculator;
 };
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-000000000000000000000011 /* __APP_NAME__.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = __APP_NAME__.app; sourceTree = BUILT_PRODUCTS_DIR; };
-000000000000000000000012 /* __APP_NAME__Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = __APP_NAME__Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-000000000000000000000013 /* __APP_NAME__UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = __APP_NAME__UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+000000000000000000000011 /* BakeryPricingCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BakeryPricingCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+000000000000000000000012 /* BakeryPricingCalculatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BakeryPricingCalculatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+000000000000000000000013 /* BakeryPricingCalculatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BakeryPricingCalculatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -35,27 +35,27 @@ isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 membershipExceptions = (
 	Info.plist,
 );
-target = 000000000000000000000401 /* __APP_NAME__ */;
+target = 000000000000000000000401 /* BakeryPricingCalculator */;
 };
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-AAAA000000000000000000AA /* __APP_NAME__ */ = {
+AAAA000000000000000000AA /* BakeryPricingCalculator */ = {
 isa = PBXFileSystemSynchronizedRootGroup;
 exceptions = (
 	BBBB000000000000000000AA /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
 );
-path = __APP_NAME__;
+path = BakeryPricingCalculator;
 sourceTree = "<group>";
 };
-AAAA000000000000000000BB /* __APP_NAME__Tests */ = {
+AAAA000000000000000000BB /* BakeryPricingCalculatorTests */ = {
 isa = PBXFileSystemSynchronizedRootGroup;
-path = __APP_NAME__Tests;
+path = BakeryPricingCalculatorTests;
 sourceTree = "<group>";
 };
-AAAA000000000000000000CC /* __APP_NAME__UITests */ = {
+AAAA000000000000000000CC /* BakeryPricingCalculatorUITests */ = {
 isa = PBXFileSystemSynchronizedRootGroup;
-path = __APP_NAME__UITests;
+path = BakeryPricingCalculatorUITests;
 sourceTree = "<group>";
 };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -70,9 +70,9 @@ sourceTree = "<group>";
 000000000000000000000302 = {
 isa = PBXGroup;
 children = (
-AAAA000000000000000000AA /* __APP_NAME__ */,
-AAAA000000000000000000BB /* __APP_NAME__Tests */,
-AAAA000000000000000000CC /* __APP_NAME__UITests */,
+AAAA000000000000000000AA /* BakeryPricingCalculator */,
+AAAA000000000000000000BB /* BakeryPricingCalculatorTests */,
+AAAA000000000000000000CC /* BakeryPricingCalculatorUITests */,
 000000000000000000000704 /* Products */,
 );
 sourceTree = "<group>";
@@ -80,9 +80,9 @@ sourceTree = "<group>";
 000000000000000000000704 /* Products */ = {
 isa = PBXGroup;
 children = (
-000000000000000000000011 /* __APP_NAME__.app */,
-000000000000000000000012 /* __APP_NAME__Tests.xctest */,
-000000000000000000000013 /* __APP_NAME__UITests.xctest */,
+000000000000000000000011 /* BakeryPricingCalculator.app */,
+000000000000000000000012 /* BakeryPricingCalculatorTests.xctest */,
+000000000000000000000013 /* BakeryPricingCalculatorUITests.xctest */,
 );
 name = Products;
 sourceTree = "<group>";
@@ -90,9 +90,9 @@ sourceTree = "<group>";
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-000000000000000000000401 /* __APP_NAME__ */ = {
+000000000000000000000401 /* BakeryPricingCalculator */ = {
 isa = PBXNativeTarget;
-buildConfigurationList = 000000000000000000000801 /* Build configuration list for PBXNativeTarget "__APP_NAME__" */;
+buildConfigurationList = 000000000000000000000801 /* Build configuration list for PBXNativeTarget "BakeryPricingCalculator" */;
 buildPhases = (
 000000000000000000000901 /* Sources */,
 000000000000000000000601 /* Frameworks */,
@@ -101,16 +101,16 @@ buildPhases = (
 buildRules = ();
 dependencies = ();
 fileSystemSynchronizedGroups = (
-AAAA000000000000000000AA /* __APP_NAME__ */,
+AAAA000000000000000000AA /* BakeryPricingCalculator */,
 );
-name = __APP_NAME__;
-productName = __APP_NAME__;
-productReference = 000000000000000000000011 /* __APP_NAME__.app */;
+name = BakeryPricingCalculator;
+productName = BakeryPricingCalculator;
+productReference = 000000000000000000000011 /* BakeryPricingCalculator.app */;
 productType = "com.apple.product-type.application";
 };
-000000000000000000000402 /* __APP_NAME__Tests */ = {
+000000000000000000000402 /* BakeryPricingCalculatorTests */ = {
 isa = PBXNativeTarget;
-buildConfigurationList = 000000000000000000000802 /* Build configuration list for PBXNativeTarget "__APP_NAME__Tests" */;
+buildConfigurationList = 000000000000000000000802 /* Build configuration list for PBXNativeTarget "BakeryPricingCalculatorTests" */;
 buildPhases = (
 000000000000000000000902 /* Sources */,
 000000000000000000000602 /* Frameworks */,
@@ -121,16 +121,16 @@ dependencies = (
 000000000000000000000211 /* PBXTargetDependency */,
 );
 fileSystemSynchronizedGroups = (
-AAAA000000000000000000BB /* __APP_NAME__Tests */,
+AAAA000000000000000000BB /* BakeryPricingCalculatorTests */,
 );
-name = __APP_NAME__Tests;
-productName = __APP_NAME__Tests;
-productReference = 000000000000000000000012 /* __APP_NAME__Tests.xctest */;
+name = BakeryPricingCalculatorTests;
+productName = BakeryPricingCalculatorTests;
+productReference = 000000000000000000000012 /* BakeryPricingCalculatorTests.xctest */;
 productType = "com.apple.product-type.bundle.unit-test";
 };
-000000000000000000000403 /* __APP_NAME__UITests */ = {
+000000000000000000000403 /* BakeryPricingCalculatorUITests */ = {
 isa = PBXNativeTarget;
-buildConfigurationList = 000000000000000000000803 /* Build configuration list for PBXNativeTarget "__APP_NAME__UITests" */;
+buildConfigurationList = 000000000000000000000803 /* Build configuration list for PBXNativeTarget "BakeryPricingCalculatorUITests" */;
 buildPhases = (
 000000000000000000000903 /* Sources */,
 000000000000000000000603 /* Frameworks */,
@@ -141,11 +141,11 @@ dependencies = (
 000000000000000000000212 /* PBXTargetDependency */,
 );
 fileSystemSynchronizedGroups = (
-AAAA000000000000000000CC /* __APP_NAME__UITests */,
+AAAA000000000000000000CC /* BakeryPricingCalculatorUITests */,
 );
-name = __APP_NAME__UITests;
-productName = __APP_NAME__UITests;
-productReference = 000000000000000000000013 /* __APP_NAME__UITests.xctest */;
+name = BakeryPricingCalculatorUITests;
+productName = BakeryPricingCalculatorUITests;
+productReference = 000000000000000000000013 /* BakeryPricingCalculatorUITests.xctest */;
 productType = "com.apple.product-type.bundle.ui-testing";
 };
 /* End PBXNativeTarget section */
@@ -163,7 +163,7 @@ TargetAttributes = {
 000000000000000000000403 = {CreatedOnToolsVersion = 26.4; TestTargetID = 000000000000000000000401; };
 };
 };
-buildConfigurationList = 000000000000000000000804 /* Build configuration list for PBXProject "__APP_NAME__" */;
+buildConfigurationList = 000000000000000000000804 /* Build configuration list for PBXProject "BakeryPricingCalculator" */;
 developmentRegion = en;
 hasScannedForEncodings = 0;
 knownRegions = (en, Base);
@@ -174,9 +174,9 @@ productRefGroup = 000000000000000000000704 /* Products */;
 projectDirPath = "";
 projectRoot = "";
 targets = (
-000000000000000000000401 /* __APP_NAME__ */,
-000000000000000000000402 /* __APP_NAME__Tests */,
-000000000000000000000403 /* __APP_NAME__UITests */,
+000000000000000000000401 /* BakeryPricingCalculator */,
+000000000000000000000402 /* BakeryPricingCalculatorTests */,
+000000000000000000000403 /* BakeryPricingCalculatorUITests */,
 );
 };
 /* End PBXProject section */
@@ -194,8 +194,8 @@ targets = (
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-000000000000000000000211 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000000401 /* __APP_NAME__ */; targetProxy = 000000000000000000000201 /* PBXContainerItemProxy */; };
-000000000000000000000212 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000000401 /* __APP_NAME__ */; targetProxy = 000000000000000000000202 /* PBXContainerItemProxy */; };
+000000000000000000000211 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000000401 /* BakeryPricingCalculator */; targetProxy = 000000000000000000000201 /* PBXContainerItemProxy */; };
+000000000000000000000212 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000000401 /* BakeryPricingCalculator */; targetProxy = 000000000000000000000202 /* PBXContainerItemProxy */; };
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -269,12 +269,12 @@ DEVELOPMENT_ASSET_PATHS = "";
 DEVELOPMENT_TEAM = "";
 ENABLE_PREVIEWS = YES;
 GENERATE_INFOPLIST_FILE = NO;
-INFOPLIST_FILE = __APP_NAME__/Info.plist;
+INFOPLIST_FILE = BakeryPricingCalculator/Info.plist;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 MARKETING_VERSION = 1.0;
 CURRENT_PROJECT_VERSION = 1;
 VERSIONING_SYSTEM = "apple-generic";
-PRODUCT_BUNDLE_IDENTIFIER = __BUNDLE_ID__;
+PRODUCT_BUNDLE_IDENTIFIER = com.yashasg.bakery-pricing-calculator;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SWIFT_EMIT_LOC_STRINGS = YES;
 SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -291,12 +291,12 @@ DEVELOPMENT_ASSET_PATHS = "";
 DEVELOPMENT_TEAM = "";
 ENABLE_PREVIEWS = YES;
 GENERATE_INFOPLIST_FILE = NO;
-INFOPLIST_FILE = __APP_NAME__/Info.plist;
+INFOPLIST_FILE = BakeryPricingCalculator/Info.plist;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 MARKETING_VERSION = 1.0;
 CURRENT_PROJECT_VERSION = 1;
 VERSIONING_SYSTEM = "apple-generic";
-PRODUCT_BUNDLE_IDENTIFIER = __BUNDLE_ID__;
+PRODUCT_BUNDLE_IDENTIFIER = com.yashasg.bakery-pricing-calculator;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SWIFT_EMIT_LOC_STRINGS = YES;
 SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -313,11 +313,11 @@ DEVELOPMENT_TEAM = "";
 GENERATE_INFOPLIST_FILE = YES;
 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-PRODUCT_BUNDLE_IDENTIFIER = __BUNDLE_ID__Tests;
+PRODUCT_BUNDLE_IDENTIFIER = com.yashasg.bakery-pricing-calculatorTests;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 TARGETED_DEVICE_FAMILY = "1,2";
-TEST_HOST = "$(BUILT_PRODUCTS_DIR)/__APP_NAME__.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/__APP_NAME__";
+TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BakeryPricingCalculator.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BakeryPricingCalculator";
 };
 name = Debug;
 };
@@ -330,11 +330,11 @@ DEVELOPMENT_TEAM = "";
 GENERATE_INFOPLIST_FILE = YES;
 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-PRODUCT_BUNDLE_IDENTIFIER = __BUNDLE_ID__Tests;
+PRODUCT_BUNDLE_IDENTIFIER = com.yashasg.bakery-pricing-calculatorTests;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 TARGETED_DEVICE_FAMILY = "1,2";
-TEST_HOST = "$(BUILT_PRODUCTS_DIR)/__APP_NAME__.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/__APP_NAME__";
+TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BakeryPricingCalculator.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BakeryPricingCalculator";
 };
 name = Release;
 };
@@ -346,11 +346,11 @@ DEVELOPMENT_TEAM = "";
 GENERATE_INFOPLIST_FILE = YES;
 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-PRODUCT_BUNDLE_IDENTIFIER = __BUNDLE_ID__UITests;
+PRODUCT_BUNDLE_IDENTIFIER = com.yashasg.bakery-pricing-calculatorUITests;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 TARGETED_DEVICE_FAMILY = "1,2";
-TEST_TARGET_NAME = __APP_NAME__;
+TEST_TARGET_NAME = BakeryPricingCalculator;
 };
 name = Debug;
 };
@@ -362,21 +362,21 @@ DEVELOPMENT_TEAM = "";
 GENERATE_INFOPLIST_FILE = YES;
 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-PRODUCT_BUNDLE_IDENTIFIER = __BUNDLE_ID__UITests;
+PRODUCT_BUNDLE_IDENTIFIER = com.yashasg.bakery-pricing-calculatorUITests;
 PRODUCT_NAME = "$(TARGET_NAME)";
 SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 TARGETED_DEVICE_FAMILY = "1,2";
-TEST_TARGET_NAME = __APP_NAME__;
+TEST_TARGET_NAME = BakeryPricingCalculator;
 };
 name = Release;
 };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-000000000000000000000801 /* Build configuration list for PBXNativeTarget "__APP_NAME__" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001101, 000000000000000000001102); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-000000000000000000000802 /* Build configuration list for PBXNativeTarget "__APP_NAME__Tests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001201, 000000000000000000001202); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-000000000000000000000803 /* Build configuration list for PBXNativeTarget "__APP_NAME__UITests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001301, 000000000000000000001302); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-000000000000000000000804 /* Build configuration list for PBXProject "__APP_NAME__" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001001, 000000000000000000001002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+000000000000000000000801 /* Build configuration list for PBXNativeTarget "BakeryPricingCalculator" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001101, 000000000000000000001102); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+000000000000000000000802 /* Build configuration list for PBXNativeTarget "BakeryPricingCalculatorTests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001201, 000000000000000000001202); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+000000000000000000000803 /* Build configuration list for PBXNativeTarget "BakeryPricingCalculatorUITests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001301, 000000000000000000001302); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+000000000000000000000804 /* Build configuration list for PBXProject "BakeryPricingCalculator" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000001001, 000000000000000000001002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 };
 rootObject = 000000000000000000000301 /* Project object */;

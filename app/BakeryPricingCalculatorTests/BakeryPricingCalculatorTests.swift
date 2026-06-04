@@ -1,7 +1,7 @@
 import XCTest
-@testable import __APP_NAME__
+@testable import BakeryPricingCalculator
 
-final class __APP_NAME__Tests: XCTestCase {
+final class BakeryPricingCalculatorTests: XCTestCase {
 
     /// Sample test — replace with your own unit tests.
     func testExample() throws {

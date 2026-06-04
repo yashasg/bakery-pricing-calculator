@@ -54,7 +54,7 @@ final class MetricsSubscriber: NSObject, MXMetricManagerSubscriber {
 ### 2. Store and register in App.init()
 
 ```swift
-// __APP_NAME__App.swift (or YourApp.swift)
+// BakeryPricingCalculatorApp.swift (or YourApp.swift)
 import SwiftUI
 import MetricKit
 

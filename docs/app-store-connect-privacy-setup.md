@@ -1,9 +1,9 @@
 # App Store Connect Privacy Nutrition Label Setup
 
-**For:** __APP_NAME__  
+**For:** BakeryPricingCalculator  
 **Author:** Hopper (Tooling Dev)  
 **Date:** 2026-05-20T19:26:30-07:00  
-**Related manifest:** `app/__APP_NAME__/PrivacyInfo.xcprivacy`
+**Related manifest:** `app/BakeryPricingCalculator/PrivacyInfo.xcprivacy`
 
 ---
 
@@ -16,7 +16,7 @@ input values. All aggregation is performed by the OS before delivery.
 
 Apple requires both:
 1. A `PrivacyInfo.xcprivacy` manifest bundled in the app (already wired into the
-   `__APP_NAME__` target's Resources phase).
+   `BakeryPricingCalculator` target's Resources phase).
 2. A matching **App Privacy nutrition label** in App Store Connect, declared before submission.
 
 ---
@@ -41,7 +41,7 @@ Purpose for all three: **App Functionality** (improving stability) + **Analytics
 ```
 App Store Connect
   └── My Apps
-        └── __APP_NAME__
+        └── BakeryPricingCalculator
               └── [Select any App Store version / 1.0 Prepare for Submission]
                     └── App Privacy   (left sidebar, under "General Information")
                           └── [Edit] → "Get Started" (first time) or "Edit Data Types"
@@ -50,7 +50,7 @@ App Store Connect
 ### Step 1 — Open App Privacy
 
 1. Sign in at [appstoreconnect.apple.com](https://appstoreconnect.apple.com).
-2. Click **My Apps** → **__APP_NAME__**.
+2. Click **My Apps** → **BakeryPricingCalculator**.
 3. In the left sidebar under your app version, click **App Privacy**.
 4. Click **Edit** (or **Get Started** on first visit).
 
@@ -109,7 +109,7 @@ Apple reviewers may ask how users can opt out of data collection. The answer:
 > **iOS Settings → Privacy & Security → Analytics & Improvements → Share With App Developers**
 >
 > When this toggle is OFF, the OS stops delivering `MXMetricPayload` and `MXDiagnosticPayload`
-> objects to all apps, including __APP_NAME__. No in-app control is needed or
+> objects to all apps, including BakeryPricingCalculator. No in-app control is needed or
 > appropriate — this is an OS-level opt-out, consistent with Apple's own privacy model for
 > diagnostic data.
 
@@ -141,7 +141,7 @@ called on app launch):
 ## Notes for Submission
 
 - `PrivacyInfo.xcprivacy` is already bundled (confirmed in `.app` build output at
-  `__APP_NAME__.app/PrivacyInfo.xcprivacy`).
+  `BakeryPricingCalculator.app/PrivacyInfo.xcprivacy`).
 - MetricKit is auto-linked (system framework; `import MetricKit` in Swift is sufficient).
   No explicit `MetricKit.framework` entry in the Frameworks build phase is required with
   modern Xcode / iOS 17.0 deployment target.

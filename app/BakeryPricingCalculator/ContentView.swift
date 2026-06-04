@@ -7,7 +7,7 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true) // decorative placeholder — replace with a labelled asset
-            Text("Hello, __APP_NAME__")
+            Text("Hello, BakeryPricingCalculator")
                 .font(.satoshiTitle)
         }
         .padding()

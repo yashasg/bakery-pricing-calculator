@@ -5,9 +5,9 @@ import XCTest
 ///
 /// Run from the command line:
 ///   xcodebuild test \
-///     -scheme __APP_NAME__ \
+///     -scheme BakeryPricingCalculator \
 ///     -destination 'platform=iOS Simulator,name=iPhone 16' \
-///     -only-testing __APP_NAME__UITests/AccessibilityAuditTests \
+///     -only-testing BakeryPricingCalculatorUITests/AccessibilityAuditTests \
 ///     2>&1 | grep -E "(PASS|FAIL|warning|error|audit)"
 @MainActor
 final class AccessibilityAuditTests: XCTestCase {

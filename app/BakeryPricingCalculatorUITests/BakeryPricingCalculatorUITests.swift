@@ -1,7 +1,7 @@
 import XCTest
 
 @MainActor
-final class __APP_NAME__UITests: XCTestCase {
+final class BakeryPricingCalculatorUITests: XCTestCase {
 
     private var app: XCUIApplication!
 
