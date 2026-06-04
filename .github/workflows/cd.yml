@@ -60,7 +60,7 @@ permissions:
 env:
   XCODE_VERSION: "26"
   DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
-  GITLAB_PROJECT: yashasg/fabric-stabilizer-picker
+  GITLAB_PROJECT: yashasg/bakery-pricing-calculator
 
 jobs:
   testflight:
