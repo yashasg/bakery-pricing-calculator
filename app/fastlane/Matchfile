@@ -1,0 +1,6 @@
+git_url("")
+storage_mode("git")
+type("appstore")
+app_identifier(["__BUNDLE_ID__"])
+username("")
+readonly(true)

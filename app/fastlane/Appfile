@@ -1,0 +1,3 @@
+app_identifier("__BUNDLE_ID__")
+apple_id("")
+team_id("")
