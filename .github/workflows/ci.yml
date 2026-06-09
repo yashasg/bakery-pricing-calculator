@@ -1,6 +1,3 @@
-# CI/CD Pipeline — GitLab bridge
-# Triggered by GitLab push/MR events, builds and tests on macOS, posts status back.
-
 name: CI
 
 on:
@@ -13,11 +10,15 @@ permissions:
 
 concurrency:
   group: ci-${{ github.event.client_payload.branch }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event.client_payload.event == 'push' && github.event.client_payload.branch != 'main' }}
 
 env:
   XCODE_VERSION: "26"
   DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
+  MODULE_CACHE: ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+  BRANCH: ${{ github.event.client_payload.branch }}
+  CACHE_BASE: derived-data-${{ runner.os }}-xcode26-
+  GITLAB_REPO_URL: https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ github.event.client_payload.project_name }}
 
 jobs:
   build-and-test:
@@ -30,19 +31,7 @@ jobs:
 
     steps:
       - name: Checkout from GitLab
-        run: |
-          git clone --depth 1 \
-            --branch "${{ github.event.client_payload.branch }}" \
-            "https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ github.event.client_payload.project_name }}" \
-            .
-
-      - name: Resolve build profile
-        run: |
-          if [[ "${{ github.event.client_payload.event }}" == "push" && "${{ github.event.client_payload.branch }}" == "main" ]]; then
-            echo "CONFIGURATION=Release" >> "$GITHUB_ENV"
-          else
-            echo "CONFIGURATION=Debug" >> "$GITHUB_ENV"
-          fi
+        run: git clone --depth 1 --branch "${{ env.BRANCH }}" "${{ env.GITLAB_REPO_URL }}" .
 
       - name: Restore DerivedData cache
         id: cache-derived-data
@@ -50,55 +39,36 @@ jobs:
         with:
           path: |
             ${{ env.DERIVED_DATA_PATH }}
-            $HOME/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-          key: derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ env.CONFIGURATION }}-${{ github.event.client_payload.branch }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
+            ${{ env.MODULE_CACHE }}
+          key: ${{ env.CACHE_BASE }}${{ env.BRANCH }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
           restore-keys: |
-            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ env.CONFIGURATION }}-${{ github.event.client_payload.branch }}-
-            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ env.CONFIGURATION }}-main-
+            ${{ env.CACHE_BASE }}${{ env.BRANCH }}-
+            ${{ env.CACHE_BASE }}main-
 
-      - name: Restore Fastlane cache
-        id: cache-fastlane
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
+      - name: Set up Ruby and install gems
+        uses: ruby/setup-ruby@v1
         with:
-          path: /opt/homebrew/Cellar/fastlane
-          key: fastlane-brew-${{ runner.os }}
-
-      - name: Install Fastlane
-        if: steps.cache-fastlane.outputs.cache-hit != 'true'
-        run: brew install fastlane
-
-      - name: Save Fastlane cache
-        if: steps.cache-fastlane.outputs.cache-hit != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
-        with:
-          path: /opt/homebrew/Cellar/fastlane
-          key: fastlane-brew-${{ runner.os }}
-
-      - name: Restore SwiftLint cache
-        id: cache-swiftlint
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
-        with:
-          path: /opt/homebrew/Cellar/swiftlint
-          key: swiftlint-brew-${{ runner.os }}
-
-      - name: Install or link SwiftLint
-        run: |
-          if [ "${{ steps.cache-swiftlint.outputs.cache-hit }}" == 'true' ]; then
-            brew link swiftlint
-          else
-            brew install swiftlint
-          fi
-
-      - name: Save SwiftLint cache
-        if: steps.cache-swiftlint.outputs.cache-hit != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
-        with:
-          path: /opt/homebrew/Cellar/swiftlint
-          key: swiftlint-brew-${{ runner.os }}
+          ruby-version: .ruby-version
+          bundler-cache: true
+          working-directory: app
 
       - name: Build & Test
         working-directory: app
-        run: fastlane ci configuration:${{ env.CONFIGURATION }}
+        run: bundle exec fastlane ci
+        env:
+          CI_BRANCH: ${{ github.event.client_payload.branch }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_HOST: ${{ vars.GITLAB_HOST }}
+          DERIVED_DATA_PATH: ${{ env.DERIVED_DATA_PATH }}
+          MATCH_ORG: ${{ vars.MATCH_ORG }}
+          MATCH_REPO: ${{ vars.MATCH_REPO }}
+          GITLAB_PROJECT_ID: ${{ github.event.client_payload.project_id }}
+          GITLAB_SHA: ${{ github.event.client_payload.sha }}
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
 
       - name: Save DerivedData cache
         if: always() && steps.cache-derived-data.outputs.cache-hit != 'true'
@@ -106,28 +76,5 @@ jobs:
         with:
           path: |
             ${{ env.DERIVED_DATA_PATH }}
-            $HOME/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+            ${{ env.MODULE_CACHE }}
           key: ${{ steps.cache-derived-data.outputs.cache-primary-key }}
-
-      - name: Upload diagnostics on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xcode-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            .build/xcodebuild-test.log
-            ${{ env.DERIVED_DATA_PATH }}/Logs/Test/*.xcresult
-            ${{ env.DERIVED_DATA_PATH }}/Logs/Build/*.xcactivitylog
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Post status to GitLab
-        if: always()
-        run: |
-          STATE=$([[ "${{ job.status }}" == "success" ]] && echo "success" || echo "failed")
-          curl -fsSX POST \
-            -H "PRIVATE-TOKEN: ${{ secrets.GITLAB_PAT }}" \
-            "https://gitlab.com/api/v4/projects/${{ github.event.client_payload.project_id }}/statuses/${{ github.event.client_payload.sha }}" \
-            -d "state=${STATE}" \
-            -d "name=Build & Test" \
-            -d "target_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
