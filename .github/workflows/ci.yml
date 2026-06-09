@@ -15,7 +15,7 @@ concurrency:
 env:
   XCODE_VERSION: "26"
   DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
-  MODULE_CACHE: ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+  MODULE_CACHE: /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
   BRANCH: ${{ github.event.client_payload.branch }}
   CACHE_BASE: derived-data-macOS-xcode26-
   GITLAB_REPO_URL: https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ github.event.client_payload.project_name }}
