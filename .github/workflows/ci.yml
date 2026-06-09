@@ -69,6 +69,10 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          DANGER_GITLAB_API_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          CI_MERGE_REQUEST_IID: ${{ github.event.client_payload.mr_iid }}
+          CI_PROJECT_ID: ${{ github.event.client_payload.project_id }}
+          CI_SERVER_URL: ${{ vars.GITLAB_HOST }}
 
       - name: Save DerivedData cache
         if: always() && steps.cache-derived-data.outputs.cache-hit != 'true'
