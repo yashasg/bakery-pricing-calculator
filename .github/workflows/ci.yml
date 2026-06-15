@@ -3,6 +3,10 @@ name: CI
 on:
   repository_dispatch:
     types: [gitlab_push, gitlab_mr]
+  # Manual trigger for bridge debugging. With no client_payload the build job's
+  # guard below evaluates false, so a bare manual run is a safe no-op smoke test
+  # that only confirms the workflow parses and is registered.
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -25,13 +29,39 @@ jobs:
     name: Build & Test
     runs-on: macos-26
     timeout-minutes: 30
-    if: |
-      github.event.client_payload.event == 'merge_request' ||
-      github.event.client_payload.event == 'push'
+    # Only build real push / MR events that carry a concrete commit SHA. A
+    # branch-deletion push (the post-merge cleanup the self-pull daemon performs)
+    # arrives with an empty or all-zero SHA; skipping it here prevents the
+    # spurious red "main CI" run that the by-branch checkout used to produce (#691).
+    if: >-
+      (github.event.client_payload.event == 'merge_request' ||
+      github.event.client_payload.event == 'push') &&
+      github.event.client_payload.sha &&
+      github.event.client_payload.sha != '0000000000000000000000000000000000000000'
 
     steps:
-      - name: Checkout from GitLab
-        run: git clone --depth 1 --branch "${{ env.BRANCH }}" "${{ env.GITLAB_REPO_URL }}" .
+      - name: Checkout from GitLab (immutable SHA)
+        env:
+          SHA: ${{ github.event.client_payload.sha }}
+        run: |
+          set -euo pipefail
+          # Fetch the exact dispatched commit SHA rather than the branch tip so the
+          # checkout is immutable: it survives the source branch being deleted right
+          # after an MR merge, and it guarantees the build + posted GitLab status
+          # both reference the same commit (no stale-tip mismatch). Fall back to the
+          # branch ref only if the host refuses an explicit by-SHA fetch (#691).
+          git init -q .
+          git remote add origin "${GITLAB_REPO_URL}"
+          if [ -n "${SHA}" ] && git fetch --depth 1 origin "${SHA}"; then
+            git checkout -q --detach "${SHA}"
+          elif [ -n "${BRANCH}" ]; then
+            echo "::warning::by-SHA fetch unavailable; falling back to branch ${BRANCH}"
+            git fetch --depth 1 origin "${BRANCH}"
+            git checkout -q --detach FETCH_HEAD
+          else
+            echo "::error::dispatch payload carried no usable gitlab_sha or branch"
+            exit 1
+          fi
 
       - name: Restore DerivedData cache
         id: cache-derived-data
