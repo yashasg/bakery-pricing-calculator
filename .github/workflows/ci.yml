@@ -1,5 +1,25 @@
 name: CI
 
+# Triggered by the GitLab → GitHub webhook (repository_dispatch). GitLab pushes a
+# `gitlab_push` or `gitlab_mr` event via the GitHub API carrying the GitLab-side
+# context (project_id, project_name, sha, branch, mr_iid) needed to check out the
+# exact commit and post commit status back to the MR.
+#
+# This file is the single canonical CI definition. The copy committed in the repo
+# is kept byte-identical to the deployed GitHub mirror default-branch workflow so
+# CIWorkflowEnvContractTests guard the file that actually runs (#701).
+#
+# Required GitHub repository secret:
+#   GITLAB_PAT   GitLab Personal Access Token (api scope): clones the repo + posts status
+#
+# The dispatch client_payload MUST include:
+#   project_id     GitLab project numeric ID
+#   project_name   GitLab namespace/name used to build the clone URL
+#   sha            Full 40-char commit SHA to check out and report status for
+#   branch         Branch name (cache key + concurrency group)
+#   mr_iid         MR IID (absent / empty for branch-push events outside an MR)
+#   event          'merge_request' or 'push'
+
 on:
   repository_dispatch:
     types: [gitlab_push, gitlab_mr]
@@ -23,6 +43,15 @@ env:
   BRANCH: ${{ github.event.client_payload.branch }}
   CACHE_BASE: derived-data-macOS-xcode26-
   GITLAB_REPO_URL: https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ github.event.client_payload.project_name }}
+  # #368: CI_SERVER_URL must be an explicit literal HTTP URI at env level so
+  # post_gitlab_status never fails with "not an HTTP URI" when the GITLAB_HOST repo
+  # var is blank. GitHub Actions does not set CI_SERVER_URL automatically.
+  CI_SERVER_URL: https://gitlab.com
+  # #369: enforce a single named simulator for every build/test run on the runner.
+  # build.sh -> resolve_simulator_context() and the Fastfile -> lane_test_options()
+  # read SIMULATOR_NAME; a fixed name plus -parallel-testing-enabled NO keeps
+  # xcodebuild from provisioning Clone 1 / Clone 2 destinations.
+  SIMULATOR_NAME: iPhone 17 Pro
 
 jobs:
   build-and-test:
@@ -96,13 +125,16 @@ jobs:
           GITLAB_SHA: ${{ github.event.client_payload.sha }}
           GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
           GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # #506: make bridge status failures loud. Require a successful status post
+          # whenever the dispatch carried real GitLab metadata (project_id + sha);
+          # bare workflow_dispatch smoke runs (no payload) skip the job entirely.
+          GITLAB_STATUS_REQUIRED: ${{ github.event.client_payload.project_id != '' && github.event.client_payload.sha != '' && 'true' || 'false' }}
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
           DANGER_GITLAB_API_TOKEN: ${{ secrets.GITLAB_PAT }}
           CI_MERGE_REQUEST_IID: ${{ github.event.client_payload.mr_iid }}
           CI_PROJECT_ID: ${{ github.event.client_payload.project_id }}
-          CI_SERVER_URL: ${{ vars.GITLAB_HOST }}
 
       - name: Save DerivedData cache
         if: always() && steps.cache-derived-data.outputs.cache-hit != 'true'
