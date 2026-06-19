@@ -1,0 +1,33 @@
+name: Restore DerivedData cache
+description: Restore the Xcode DerivedData and module cache shared by the ci and cd workflows.
+
+inputs:
+  key:
+    description: Exact cache key to look up first.
+    required: true
+  restore-keys:
+    description: Newline-separated prefix keys to fall back to on a miss.
+    required: false
+    default: ""
+
+outputs:
+  cache-hit:
+    description: "'true' when an exact key match was restored."
+    value: ${{ steps.restore.outputs.cache-hit }}
+  cache-primary-key:
+    description: The resolved primary key, to hand to the matching save-cache action.
+    value: ${{ steps.restore.outputs.cache-primary-key }}
+
+runs:
+  using: composite
+  steps:
+    - id: restore
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
+      with:
+        # Kept in sync with DERIVED_DATA_PATH (github.workspace/build/app/xcode-derived-data)
+        # used by build.sh / the Fastfile, plus Xcode's shared module cache.
+        path: |
+          ${{ github.workspace }}/build/app/xcode-derived-data
+          ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
