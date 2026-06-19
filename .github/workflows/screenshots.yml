@@ -32,13 +32,13 @@ jobs:
 
       - name: Write ASC API key
         if: ${{ inputs.lane == 'screenshots_and_metadata' }}
-        uses: ./.github/actions/write-asc-api-key
+        uses: yashasg/bakery-pricing-calculator/.github/actions/write-asc-api-key@main
         with:
           asc-api-key-json: ${{ secrets.ASC_API_KEY_JSON }}
 
       - name: Restore DerivedData cache
         id: cache
-        uses: ./.github/actions/restore-cache
+        uses: yashasg/bakery-pricing-calculator/.github/actions/restore-cache@main
         with:
           key: derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Screenshots-${{ inputs.ref }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
           restore-keys: |
@@ -46,7 +46,7 @@ jobs:
             derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Screenshots-main-
 
       - name: Setup fastlane
-        uses: ./.github/actions/setup-fastlane
+        uses: yashasg/bakery-pricing-calculator/.github/actions/setup-fastlane@main
 
       - name: Verify an iPad simulator is available
         run: |
@@ -78,7 +78,7 @@ jobs:
 
       - name: Save DerivedData cache
         if: always()
-        uses: ./.github/actions/save-cache
+        uses: yashasg/bakery-pricing-calculator/.github/actions/save-cache@main
         with:
           key: ${{ steps.cache.outputs.cache-primary-key }}
           cache-hit: ${{ steps.cache.outputs.cache-hit }}
