@@ -1,0 +1,36 @@
+name: Write ASC API key
+description: Write and validate app/fastlane/asc_api_key.json from the App Store Connect API key JSON.
+
+inputs:
+  asc-api-key-json:
+    description: Raw App Store Connect API key JSON (the ASC_API_KEY_JSON secret value).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Write App Store Connect API key
+      shell: bash
+      env:
+        ASC_API_KEY_JSON: ${{ inputs.asc-api-key-json }}
+      run: |
+        mkdir -p app/fastlane
+        printf '%s' "$ASC_API_KEY_JSON" > app/fastlane/asc_api_key.json
+        if ! python3 -c "import json,sys; json.load(open('app/fastlane/asc_api_key.json'))" 2>/dev/null; then
+          echo "::error::ASC_API_KEY_JSON secret is not valid JSON after write. Check the secret value (must be raw JSON, no surrounding quotes)."
+          exit 1
+        fi
+
+    - name: Verify ASC API key file written
+      shell: bash
+      working-directory: app
+      run: |
+        if [ ! -s fastlane/asc_api_key.json ]; then
+          echo "::error::fastlane/asc_api_key.json is missing or empty. Check the ASC_API_KEY_JSON secret."
+          exit 1
+        fi
+        if ! jq -e 'type == "object" and has("key_id") and has("issuer_id") and has("key")' fastlane/asc_api_key.json > /dev/null; then
+          echo "::error::ASC_API_KEY_JSON secret is not valid JSON or is missing key_id/issuer_id/key. Update the secret with strict JSON (quoted keys/strings)."
+          exit 1
+        fi
+        echo "ASC API key file present ($(wc -c < fastlane/asc_api_key.json) bytes) and valid JSON"
