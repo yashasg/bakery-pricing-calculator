@@ -1,0 +1,95 @@
+name: App Store Screenshots (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      lane: { required: true, type: string }   # screenshots | screenshots_and_metadata
+      ref:  { required: true, type: string }
+    # Secrets via `secrets: inherit` (GITLAB_PAT always; ASC_API_KEY_JSON for *_and_metadata).
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  XCODE_VERSION: "26"
+  DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
+  GITLAB_PROJECT: yashasg/bakery-pricing-calculator
+
+jobs:
+  screenshots:
+    name: ${{ inputs.lane == 'screenshots_and_metadata' && 'Screenshots + Metadata' || 'Capture Screenshots' }}
+    runs-on: macos-26
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout from GitLab
+        run: |
+          git clone --depth 1 \
+            --branch "${{ inputs.ref }}" \
+            "https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ env.GITLAB_PROJECT }}" \
+            .
+
+      - name: Write ASC API key
+        if: ${{ inputs.lane == 'screenshots_and_metadata' }}
+        uses: ./.github/actions/write-asc-api-key
+        with:
+          asc-api-key-json: ${{ secrets.ASC_API_KEY_JSON }}
+
+      - name: Restore DerivedData cache
+        id: cache
+        uses: ./.github/actions/restore-cache
+        with:
+          key: derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Screenshots-${{ inputs.ref }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
+          restore-keys: |
+            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Screenshots-${{ inputs.ref }}-
+            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Screenshots-main-
+
+      - name: Setup fastlane
+        uses: ./.github/actions/setup-fastlane
+
+      - name: Verify an iPad simulator is available
+        run: |
+          echo "iPhone simulators:"; xcrun simctl list devices available | grep -i iphone || true
+          echo "iPad simulators:";   xcrun simctl list devices available | grep -i ipad   || true
+          if ! xcrun simctl list devices available | grep -qi ipad; then
+            echo "::error::No iPad simulator on this runner. The screenshots lane needs an iPad-class destination to capture the iPad set."
+            exit 1
+          fi
+
+      - name: Capture App Store screenshots
+        working-directory: app
+        run: |
+          # Do NOT set SIMULATOR_NAME here. When set, the Fastfile screenshot_devices()
+          # returns only that single (iPhone) device and skips the iPad. Left unset, it
+          # auto-selects one iPhone plus one iPad destination.
+          bundle exec fastlane "${{ inputs.lane }}"
+
+      - name: Upload captured screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: app-store-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            app/fastlane/screenshots/**/*.png
+            app/fastlane/screenshots/**/*.html
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Save DerivedData cache
+        if: always()
+        uses: ./.github/actions/save-cache
+        with:
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+          cache-hit: ${{ steps.cache.outputs.cache-hit }}
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: screenshots-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .build/**/*.log
+            ${{ env.DERIVED_DATA_PATH }}/Logs/Test/*.xcresult
+          if-no-files-found: warn
+          retention-days: 14
