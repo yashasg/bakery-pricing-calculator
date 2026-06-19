@@ -1,10 +1,8 @@
-# CD workflow
-# Manual-only distribution workflow that builds from the GitLab source of truth and uploads via Fastlane's beta (TestFlight) or release (App Store) lane.
-# CI remains in .github/workflows/ci.yml; this workflow intentionally has no automatic push/MR trigger.
-# Required GitHub secrets:
-# - GITLAB_PAT: GitLab PAT with read access to yashasg/cocktail-batch-dilution and yashasg/fastlane_hisa
-# - ASC_API_KEY_JSON
-# - MATCH_PASSWORD
+# CD workflow (thin dispatcher).
+# Each job is a reusable workflow: testflight.yml (beta/release) and screenshots.yml.
+# Deploy all three files together to the mirror; local `uses: ./...` resolves them
+# from the same ref as this caller.
+# Required GitHub secrets: GITLAB_PAT, ASC_API_KEY_JSON (release + screenshots_and_metadata), MATCH_PASSWORD (release).
 
 name: CD
 
@@ -12,13 +10,15 @@ on:
   workflow_dispatch:
     inputs:
       lane:
-        description: Which Fastlane lane to run (beta = TestFlight, release = App Store)
+        description: Fastlane lane (beta = TestFlight, release = App Store, screenshots = capture only, screenshots_and_metadata = capture + upload)
         required: true
         default: beta
         type: choice
         options:
           - beta
           - release
+          - screenshots
+          - screenshots_and_metadata
       ref_type:
         description: Build from a branch or a tag?
         required: true
@@ -34,6 +34,57 @@ on:
         type: string
       notes:
         description: Optional release notes passed to the selected Fastlane lane
+        required: false
+        default: ""
+        type: string
+      skip_tests:
+        description: Skip the Release CI gate before uploading (beta/release only)
+        required: false
+        default: false
+        type: boolean
+      version_bump:
+        description: Semantic version bump (beta/release only; choose none for tag dispatches)
+        required: false
+        default: patch
+        type: choice
+        options:
+          - none
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  testflight:
+    name: ${{ inputs.lane == 'release' && 'App Store Release' || 'TestFlight' }}
+    if: ${{ inputs.lane == 'beta' || inputs.lane == 'release' }}
+    uses: ./.github/workflows/testflight.yml
+    with:
+      lane: ${{ inputs.lane }}
+      ref: ${{ inputs.ref }}
+      ref_type: ${{ inputs.ref_type }}
+      notes: ${{ inputs.notes }}
+      skip_tests: ${{ inputs.skip_tests }}
+      version_bump: ${{ inputs.version_bump }}
+    secrets: inherit
+    concurrency:
+      group: cd-${{ inputs.lane }}-${{ inputs.ref }}
+      cancel-in-progress: false
+
+  screenshots:
+    name: ${{ inputs.lane == 'screenshots_and_metadata' && 'Screenshots + Metadata' || 'Capture Screenshots' }}
+    if: ${{ inputs.lane == 'screenshots' || inputs.lane == 'screenshots_and_metadata' }}
+    uses: ./.github/workflows/screenshots.yml
+    with:
+      lane: ${{ inputs.lane }}
+      ref: ${{ inputs.ref }}
+    secrets: inherit
+    concurrency:
+      group: cd-screenshots-${{ inputs.ref }}
+      cancel-in-progress: false
         required: false
         default: ""
         type: string
