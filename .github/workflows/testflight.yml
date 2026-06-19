@@ -1,0 +1,128 @@
+name: TestFlight / App Store (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      lane:         { required: true,  type: string }
+      ref:          { required: true,  type: string }
+      ref_type:     { required: false, type: string,  default: branch }
+      notes:        { required: false, type: string,  default: "" }
+      skip_tests:   { required: false, type: boolean, default: false }
+      version_bump: { required: false, type: string,  default: patch }
+    # Secrets arrive via `secrets: inherit` from the caller (GITLAB_PAT, ASC_API_KEY_JSON, MATCH_PASSWORD).
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  XCODE_VERSION: "26"
+  DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
+  GITLAB_PROJECT: yashasg/bakery-pricing-calculator
+
+jobs:
+  testflight:
+    name: ${{ inputs.lane == 'release' && 'App Store Release' || 'TestFlight' }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      TESTFLIGHT_NOTES: ${{ inputs.notes }}
+
+    steps:
+      - name: Validate dispatch inputs
+        if: ${{ inputs.ref_type == 'tag' && inputs.version_bump != 'none' }}
+        run: |
+          echo "::error::version_bump must be 'none' when ref_type is 'tag' (tags are immutable refs)"
+          exit 1
+
+      - name: Checkout from GitLab
+        run: |
+          git clone --depth 1 \
+            --branch "${{ inputs.ref }}" \
+            "https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ env.GITLAB_PROJECT }}" \
+            .
+
+      - name: Write ASC API key
+        uses: ./.github/actions/write-asc-api-key
+        with:
+          asc-api-key-json: ${{ secrets.ASC_API_KEY_JSON }}
+
+      - name: Restore DerivedData cache
+        id: cache
+        uses: ./.github/actions/restore-cache
+        with:
+          key: derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Release-${{ inputs.ref }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
+          restore-keys: |
+            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Release-${{ inputs.ref }}-
+            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Release-main-
+
+      - name: Setup fastlane
+        uses: ./.github/actions/setup-fastlane
+
+      - name: Prepare Match authentication
+        run: |
+          echo "MATCH_GIT_BASIC_AUTHORIZATION=$(printf '%s' "oauth2:${{ secrets.GITLAB_PAT }}" | base64 | tr -d '\n')" >> "$GITHUB_ENV"
+
+      - name: Generate temporary Match keychain password
+        run: |
+          echo "MATCH_KEYCHAIN_PASSWORD=$(openssl rand -base64 24)" >> "$GITHUB_ENV"
+
+      - name: Install Apple WWDR intermediate certificate
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/AppleWWDRCAG6.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
+          echo "WWDR_CERT_PATH=$RUNNER_TEMP/AppleWWDRCAG6.cer" >> "$GITHUB_ENV"
+
+      - name: Run XCTest gate
+        if: ${{ !inputs.skip_tests }}
+        working-directory: app
+        run: bundle exec fastlane test
+
+      - name: Upload via Fastlane lane
+        working-directory: app
+        run: |
+          fastlane_args=()
+
+          if [[ "${{ inputs.version_bump }}" != "none" ]]; then
+            fastlane_args+=("bump:${{ inputs.version_bump }}")
+          fi
+
+          if [[ -n "$TESTFLIGHT_NOTES" ]]; then
+            fastlane_args+=("notes:$TESTFLIGHT_NOTES")
+          fi
+
+          bundle exec fastlane "${{ inputs.lane }}" "${fastlane_args[@]}"
+
+      - name: Save DerivedData cache
+        if: always()
+        uses: ./.github/actions/save-cache
+        with:
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+          cache-hit: ${{ steps.cache.outputs.cache-hit }}
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: testflight-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            app/*.ipa
+            app/*.pkg
+            app/*.app.dSYM.zip
+            app/*.dSYM.zip
+            app/*.xcarchive
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: xcode-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .build/xcodebuild-test.log
+            .build/gym/**/*.log
+            ${{ env.DERIVED_DATA_PATH }}/Logs/Test/*.xcresult
+            ${{ env.DERIVED_DATA_PATH }}/Logs/Build/*.xcactivitylog
+          if-no-files-found: warn
+          retention-days: 14
