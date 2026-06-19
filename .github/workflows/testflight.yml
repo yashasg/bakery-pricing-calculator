@@ -43,11 +43,6 @@ jobs:
             "https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ env.GITLAB_PROJECT }}" \
             .
 
-      - name: Write ASC API key
-        uses: yashasg/bakery-pricing-calculator/.github/actions/write-asc-api-key@main
-        with:
-          asc-api-key-json: ${{ secrets.ASC_API_KEY_JSON }}
-
       - name: Restore DerivedData cache
         id: cache
         uses: yashasg/bakery-pricing-calculator/.github/actions/restore-cache@main
@@ -73,13 +68,19 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/AppleWWDRCAG6.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
           echo "WWDR_CERT_PATH=$RUNNER_TEMP/AppleWWDRCAG6.cer" >> "$GITHUB_ENV"
 
-      - name: Run XCTest gate
+      - name: Run XCTest gate (Release config)
         if: ${{ !inputs.skip_tests }}
         working-directory: app
-        run: bundle exec fastlane test
+        # Test the same configuration that ships to TestFlight. @testable is enabled
+        # for the Release test build via the Fastfile lane_test_options xcargs.
+        run: bundle exec fastlane test configuration:Release
 
       - name: Upload via Fastlane lane
         working-directory: app
+        env:
+          # Consumed directly by the Fastfile load_asc_api_key (app_store_connect_api_key);
+          # no need to materialize asc_api_key.json on disk.
+          ASC_API_KEY_JSON: ${{ secrets.ASC_API_KEY_JSON }}
         run: |
           fastlane_args=()
 

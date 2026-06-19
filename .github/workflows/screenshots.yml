@@ -30,12 +30,6 @@ jobs:
             "https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ env.GITLAB_PROJECT }}" \
             .
 
-      - name: Write ASC API key
-        if: ${{ inputs.lane == 'screenshots_and_metadata' }}
-        uses: yashasg/bakery-pricing-calculator/.github/actions/write-asc-api-key@main
-        with:
-          asc-api-key-json: ${{ secrets.ASC_API_KEY_JSON }}
-
       - name: Restore DerivedData cache
         id: cache
         uses: yashasg/bakery-pricing-calculator/.github/actions/restore-cache@main
@@ -59,6 +53,10 @@ jobs:
 
       - name: Capture App Store screenshots
         working-directory: app
+        env:
+          # Consumed by the Fastfile load_asc_api_key on the screenshots_and_metadata
+          # path (app_store_connect_api_key); ignored by plain screenshots.
+          ASC_API_KEY_JSON: ${{ secrets.ASC_API_KEY_JSON }}
         run: |
           # Do NOT set SIMULATOR_NAME here. When set, the Fastfile screenshot_devices()
           # returns only that single (iPhone) device and skips the iPad. Left unset, it
