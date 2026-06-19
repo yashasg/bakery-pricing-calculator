@@ -68,12 +68,10 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/AppleWWDRCAG6.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
           echo "WWDR_CERT_PATH=$RUNNER_TEMP/AppleWWDRCAG6.cer" >> "$GITHUB_ENV"
 
-      - name: Run XCTest gate (Release config)
+      - name: Run XCTest gate
         if: ${{ !inputs.skip_tests }}
         working-directory: app
-        # Test the same configuration that ships to TestFlight. @testable is enabled
-        # for the Release test build via the Fastfile lane_test_options xcargs.
-        run: bundle exec fastlane test configuration:Release
+        run: bundle exec fastlane test
 
       - name: Upload via Fastlane lane
         working-directory: app
