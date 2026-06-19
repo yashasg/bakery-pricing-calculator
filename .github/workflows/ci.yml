@@ -39,7 +39,6 @@ concurrency:
 env:
   XCODE_VERSION: "26"
   DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
-  MODULE_CACHE: /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
   BRANCH: ${{ github.event.client_payload.branch }}
   CACHE_BASE: derived-data-macOS-xcode26-
   GITLAB_REPO_URL: https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ github.event.client_payload.project_name }}
@@ -93,23 +92,18 @@ jobs:
           fi
 
       - name: Restore DerivedData cache
-        id: cache-derived-data
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        id: cache
+        uses: yashasg/bakery-pricing-calculator/.github/actions/restore-cache@main
         with:
-          path: |
-            ${{ env.DERIVED_DATA_PATH }}
-            ${{ env.MODULE_CACHE }}
           key: ${{ env.CACHE_BASE }}${{ env.BRANCH }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
           restore-keys: |
             ${{ env.CACHE_BASE }}${{ env.BRANCH }}-
             ${{ env.CACHE_BASE }}main-
 
       - name: Set up Ruby and install gems
-        uses: ruby/setup-ruby@v1
+        uses: yashasg/bakery-pricing-calculator/.github/actions/setup-fastlane@main
         with:
           ruby-version: .ruby-version
-          bundler-cache: true
-          working-directory: app
 
       - name: Build & Test
         working-directory: app
@@ -137,10 +131,8 @@ jobs:
           CI_PROJECT_ID: ${{ github.event.client_payload.project_id }}
 
       - name: Save DerivedData cache
-        if: always() && steps.cache-derived-data.outputs.cache-hit != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        if: always()
+        uses: yashasg/bakery-pricing-calculator/.github/actions/save-cache@main
         with:
-          path: |
-            ${{ env.DERIVED_DATA_PATH }}
-            ${{ env.MODULE_CACHE }}
-          key: ${{ steps.cache-derived-data.outputs.cache-primary-key }}
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+          cache-hit: ${{ steps.cache.outputs.cache-hit }}
