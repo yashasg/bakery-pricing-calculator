@@ -57,6 +57,13 @@ permissions:
   contents: read
   actions: read
 
+# Job-level `concurrency` is not allowed on jobs that call a reusable workflow,
+# so it lives at the workflow level. Each dispatch runs exactly one job
+# (testflight or screenshots, by lane), so a lane+ref group is equivalent.
+concurrency:
+  group: cd-${{ github.event.inputs.lane }}-${{ github.event.inputs.ref }}
+  cancel-in-progress: false
+
 jobs:
   testflight:
     name: ${{ inputs.lane == 'release' && 'App Store Release' || 'TestFlight' }}
@@ -70,9 +77,6 @@ jobs:
       skip_tests: ${{ inputs.skip_tests }}
       version_bump: ${{ inputs.version_bump }}
     secrets: inherit
-    concurrency:
-      group: cd-${{ inputs.lane }}-${{ inputs.ref }}
-      cancel-in-progress: false
 
   screenshots:
     name: ${{ inputs.lane == 'screenshots_and_metadata' && 'Screenshots + Metadata' || 'Capture Screenshots' }}
@@ -82,173 +86,3 @@ jobs:
       lane: ${{ inputs.lane }}
       ref: ${{ inputs.ref }}
     secrets: inherit
-    concurrency:
-      group: cd-screenshots-${{ inputs.ref }}
-      cancel-in-progress: false
-        required: false
-        default: ""
-        type: string
-      skip_tests:
-        description: Skip the Release CI gate before uploading via Fastlane
-        required: false
-        default: false
-        type: boolean
-      version_bump:
-        description: Semantic version bump before TestFlight build-number increment (patch default; choose none for tag dispatches)
-        required: false
-        default: patch
-        type: choice
-        options:
-          - none
-          - patch
-          - minor
-          - major
-
-permissions:
-  contents: read
-  actions: read
-
-env:
-  XCODE_VERSION: "26"
-  DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
-  GITLAB_PROJECT: yashasg/bakery-pricing-calculator
-
-jobs:
-  testflight:
-    name: ${{ inputs.lane == 'release' && 'App Store Release' || 'TestFlight' }}
-    runs-on: macos-26
-    timeout-minutes: 60
-    concurrency:
-      group: cd-${{ inputs.lane }}-${{ inputs.ref }}
-      cancel-in-progress: false
-    env:
-      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-      TESTFLIGHT_NOTES: ${{ inputs.notes }}
-
-    steps:
-      - name: Validate dispatch inputs
-        if: ${{ inputs.ref_type == 'tag' && inputs.version_bump != 'none' }}
-        run: |
-          echo "::error::version_bump must be 'none' when ref_type is 'tag' (tags are immutable refs)"
-          exit 1
-
-      - name: Checkout from GitLab
-        run: |
-          git clone --depth 1 \
-            --branch "${{ inputs.ref }}" \
-            "https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ env.GITLAB_PROJECT }}" \
-            .
-
-      - name: Write App Store Connect API key
-        env:
-          ASC_API_KEY_JSON: ${{ secrets.ASC_API_KEY_JSON }}
-        run: |
-          mkdir -p app/fastlane
-          printf '%s' "$ASC_API_KEY_JSON" > app/fastlane/asc_api_key.json
-          # Fail fast if the secret was malformed / mangled
-          if ! python3 -c "import json,sys; json.load(open('app/fastlane/asc_api_key.json'))" 2>/dev/null; then
-            echo "::error::ASC_API_KEY_JSON secret is not valid JSON after write. Check the secret value (must be raw JSON, no surrounding quotes)."
-            exit 1
-          fi
-        shell: bash
-
-      - name: Verify ASC API key file written
-        working-directory: app
-        run: |
-          if [ ! -s fastlane/asc_api_key.json ]; then
-            echo "::error::fastlane/asc_api_key.json is missing or empty. Check the ASC_API_KEY_JSON secret."
-            exit 1
-          fi
-          if ! jq -e 'type == "object" and has("key_id") and has("issuer_id") and has("key")' fastlane/asc_api_key.json > /dev/null; then
-            echo "::error::ASC_API_KEY_JSON secret is not valid JSON or is missing key_id/issuer_id/key. Update the secret with strict JSON (quoted keys/strings)."
-            exit 1
-          fi
-          echo "ASC API key file present ($(wc -c < fastlane/asc_api_key.json) bytes) and valid JSON"
-
-      - name: Restore DerivedData cache
-        id: cache-derived-data
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
-        with:
-          path: |
-            ${{ env.DERIVED_DATA_PATH }}
-            $HOME/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-          key: derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Release-${{ inputs.ref }}-${{ hashFiles('app/app.xcodeproj/**/*.pbxproj', 'app/app.xcodeproj/xcshareddata/xcschemes/*.xcscheme') }}
-          restore-keys: |
-            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Release-${{ inputs.ref }}-
-            derived-data-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-Release-main-
-
-      - name: Setup Ruby for fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4'
-          bundler-cache: true
-          working-directory: app
-
-      - name: Prepare Match authentication
-        run: |
-          echo "MATCH_GIT_BASIC_AUTHORIZATION=$(printf '%s' "oauth2:${{ secrets.GITLAB_PAT }}" | base64 | tr -d '\n')" >> "$GITHUB_ENV"
-
-      - name: Generate temporary Match keychain password
-        run: |
-          echo "MATCH_KEYCHAIN_PASSWORD=$(openssl rand -base64 24)" >> "$GITHUB_ENV"
-
-      - name: Install Apple WWDR intermediate certificate
-        run: |
-          curl -fsSL -o "$RUNNER_TEMP/AppleWWDRCAG6.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
-          echo "WWDR_CERT_PATH=$RUNNER_TEMP/AppleWWDRCAG6.cer" >> "$GITHUB_ENV"
-
-      - name: Run XCTest gate
-        if: ${{ !inputs.skip_tests }}
-        working-directory: app
-        run: bundle exec fastlane test
-
-      - name: Upload via Fastlane lane
-        working-directory: app
-        run: |
-          fastlane_args=()
-
-          if [[ "${{ inputs.version_bump }}" != "none" ]]; then
-            fastlane_args+=("bump:${{ inputs.version_bump }}")
-          fi
-
-          if [[ -n "$TESTFLIGHT_NOTES" ]]; then
-            fastlane_args+=("notes:$TESTFLIGHT_NOTES")
-          fi
-
-          bundle exec fastlane "${{ inputs.lane }}" "${fastlane_args[@]}"
-
-      - name: Save DerivedData cache
-        if: always() && steps.cache-derived-data.outputs.cache-hit != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
-        with:
-          path: |
-            ${{ env.DERIVED_DATA_PATH }}
-            $HOME/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-          key: ${{ steps.cache-derived-data.outputs.cache-primary-key }}
-
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: testflight-build-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            app/*.ipa
-            app/*.pkg
-            app/*.app.dSYM.zip
-            app/*.dSYM.zip
-            app/*.xcarchive
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Upload diagnostics on failure
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: xcode-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            .build/xcodebuild-test.log
-            .build/gym/**/*.log
-            ${{ env.DERIVED_DATA_PATH }}/Logs/Test/*.xcresult
-            ${{ env.DERIVED_DATA_PATH }}/Logs/Build/*.xcactivitylog
-          if-no-files-found: warn
-          retention-days: 14
