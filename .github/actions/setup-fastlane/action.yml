@@ -1,0 +1,22 @@
+name: Setup fastlane
+description: Install Ruby and bundler-cached gems for the app/ Gemfile so fastlane lanes can run.
+
+inputs:
+  ruby-version:
+    description: Ruby version to install.
+    required: false
+    default: "3.4"
+  working-directory:
+    description: Directory containing the Gemfile.
+    required: false
+    default: app
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Ruby for fastlane
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby-version }}
+        bundler-cache: true
+        working-directory: ${{ inputs.working-directory }}
