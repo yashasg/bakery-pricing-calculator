@@ -1,0 +1,22 @@
+name: Save DerivedData cache
+description: Save the Xcode DerivedData and module cache unless an exact key match was already restored.
+
+inputs:
+  key:
+    description: Primary key to save under (use restore-cache's cache-primary-key output).
+    required: true
+  cache-hit:
+    description: The restore step's cache-hit; the save is skipped when this is 'true'.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - if: ${{ inputs.cache-hit != 'true' }}
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
+      with:
+        path: |
+          ${{ github.workspace }}/build/app/xcode-derived-data
+          ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+        key: ${{ inputs.key }}
