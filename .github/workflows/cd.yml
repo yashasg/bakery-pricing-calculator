@@ -3,10 +3,13 @@
 # Deploy all three files together to the mirror; local `uses: ./...` resolves them
 # from the same ref as this caller.
 # Required GitHub secrets: GITLAB_PAT, ASC_API_KEY_JSON (release + screenshots_and_metadata), MATCH_PASSWORD (release).
+# Nightly: 09:00 UTC (02:00 PT) beta from main, skipped when main had no new commits in the last 24h.
 
 name: CD
 
 on:
+  schedule:
+    - cron: "0 9 * * *"
   workflow_dispatch:
     inputs:
       lane:
@@ -57,25 +60,43 @@ permissions:
   contents: read
   actions: read
 
-# Job-level `concurrency` is not allowed on jobs that call a reusable workflow,
-# so it lives at the workflow level. Each dispatch runs exactly one job
-# (testflight or screenshots, by lane), so a lane+ref group is equivalent.
 concurrency:
-  group: cd-${{ github.event.inputs.lane }}-${{ github.event.inputs.ref }}
+  group: cd-${{ github.event.inputs.lane || 'beta' }}-${{ github.event.inputs.ref || 'main' }}
   cancel-in-progress: false
 
 jobs:
+  # Nightly skips when main had no commits in the last 24h; manual dispatch always proceeds.
+  guard:
+    name: Nightly change check
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          git clone --depth=50 --branch main \
+            "https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/yashasg/bakery-pricing-calculator.git" repo
+          if [ -n "$(cd repo && git log --since='24 hours ago' --oneline)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   testflight:
     name: ${{ inputs.lane == 'release' && 'App Store Release' || 'TestFlight' }}
-    if: ${{ inputs.lane == 'beta' || inputs.lane == 'release' }}
+    needs: guard
+    if: ${{ needs.guard.outputs.changed == 'true' && (inputs.lane == null || inputs.lane == 'beta' || inputs.lane == 'release') }}
     uses: ./.github/workflows/testflight.yml
     with:
-      lane: ${{ inputs.lane }}
-      ref: ${{ inputs.ref }}
-      ref_type: ${{ inputs.ref_type }}
-      notes: ${{ inputs.notes }}
-      skip_tests: ${{ inputs.skip_tests }}
-      version_bump: ${{ inputs.version_bump }}
+      lane: ${{ inputs.lane || 'beta' }}
+      ref: ${{ inputs.ref || 'main' }}
+      ref_type: ${{ inputs.ref_type || 'branch' }}
+      notes: ${{ inputs.notes || '' }}
+      skip_tests: ${{ inputs.skip_tests || false }}
+      version_bump: ${{ inputs.version_bump || 'patch' }}
     secrets: inherit
 
   screenshots:
