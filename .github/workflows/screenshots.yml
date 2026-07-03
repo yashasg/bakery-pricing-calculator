@@ -3,7 +3,7 @@ name: App Store Screenshots (reusable)
 on:
   workflow_call:
     inputs:
-      lane: { required: true, type: string }   # screenshots | screenshots_and_metadata
+      lane: { required: true, type: string }   # screenshots | screenshots_and_metadata | metadata
       ref:  { required: true, type: string }
     # Secrets via `secrets: inherit` (GITLAB_PAT always; ASC_API_KEY_JSON for *_and_metadata).
 
@@ -18,7 +18,7 @@ env:
 
 jobs:
   screenshots:
-    name: ${{ inputs.lane == 'screenshots_and_metadata' && 'Screenshots + Metadata' || 'Capture Screenshots' }}
+    name: ${{ inputs.lane == 'metadata' && 'Upload Metadata + Screenshots' || (inputs.lane == 'screenshots_and_metadata' && 'Screenshots + Metadata' || 'Capture Screenshots') }}
     runs-on: macos-26
     timeout-minutes: 60
 
@@ -43,6 +43,7 @@ jobs:
         uses: yashasg/bakery-pricing-calculator/.github/actions/setup-fastlane@main
 
       - name: Verify an iPad simulator is available
+        if: ${{ inputs.lane != 'metadata' }}
         run: |
           echo "iPhone simulators:"; xcrun simctl list devices available | grep -i iphone || true
           echo "iPad simulators:";   xcrun simctl list devices available | grep -i ipad   || true
@@ -51,7 +52,7 @@ jobs:
             exit 1
           fi
 
-      - name: Capture App Store screenshots
+      - name: Run fastlane (${{ inputs.lane }})
         working-directory: app
         env:
           # Consumed by the Fastfile load_asc_api_key on the screenshots_and_metadata
@@ -70,7 +71,7 @@ jobs:
           bundle exec fastlane "${{ inputs.lane }}"
 
       - name: Upload captured screenshots
-        if: always()
+        if: ${{ always() && inputs.lane != 'metadata' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: app-store-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
