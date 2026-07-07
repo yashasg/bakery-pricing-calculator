@@ -1,0 +1,84 @@
+name: CI Review
+
+# Independent Copilot CLI review, decoupled from ci.yml's build/test job so a
+# slow/flaky review never blocks or slows the real CI gate. Same GitLab -> GitHub
+# repository_dispatch bridge as ci.yml (see that file's header for the full
+# bridge architecture). Advisory only: posts a comment on the GitLab MR, never
+# fails the dispatch.
+#
+# Auth: this repo is personally-owned, so Copilot CLI authenticates with the
+# Actions-issued GITHUB_TOKEN billed to the repo owner's Copilot seat, granted
+# via the `copilot-requests: write` permission below. No PAT/secret needed
+# (verified against https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli-in-actions).
+#
+# ponytail: diff base is hardcoded to origin/main (every MR in this repo targets
+# main, see .squad/skills/glab/SKILL.md). Upgrade path: fetch the MR's real
+# target_branch from the GitLab API if stacked/non-main-target MRs ever appear.
+
+on:
+  repository_dispatch:
+    types: [gitlab_push, gitlab_mr]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+concurrency:
+  group: ci-review-${{ github.event.client_payload.branch }}
+  cancel-in-progress: true
+
+jobs:
+  copilot-review:
+    name: Copilot Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only merge-request dispatches have somewhere to post a comment; a bare
+    # branch push outside an MR is skipped (nothing to attach the review to).
+    if: >-
+      github.event.client_payload.event == 'merge_request' &&
+      github.event.client_payload.sha &&
+      github.event.client_payload.sha != '0000000000000000000000000000000000000000' &&
+      github.event.client_payload.mr_iid != ''
+
+    steps:
+      - name: Checkout from GitLab (MR SHA + main for diff base)
+        env:
+          SHA: ${{ github.event.client_payload.sha }}
+          GITLAB_REPO_URL: https://gitlab-token:${{ secrets.GITLAB_PAT }}@gitlab.com/${{ github.event.client_payload.project_name }}
+        run: |
+          set -euo pipefail
+          git init -q .
+          git remote add origin "${GITLAB_REPO_URL}"
+          git fetch -q origin main:refs/remotes/origin/main
+          git fetch -q origin "${SHA}"
+          git checkout -q --detach "${SHA}"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Run Copilot review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          copilot -p "Run 'git diff origin/main...HEAD' to see this merge request's changes, then review them. Only report genuine bugs, security vulnerabilities, and logic errors - never style, formatting, or trivial matters. Write concise markdown findings to review.md. If nothing significant is found, write 'No significant issues found.' to review.md." \
+            --allow-tool='shell(git:*)' --allow-tool=write --no-ask-user --no-color
+          echo "(review exit: $?)"
+
+      - name: Post review to GitLab MR
+        if: always()
+        env:
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          PROJECT_ID: ${{ github.event.client_payload.project_id }}
+          MR_IID: ${{ github.event.client_payload.mr_iid }}
+        run: |
+          set -uo pipefail
+          [ -f review.md ] || echo "_(Copilot review produced no output - see the Actions run log.)_" > review.md
+          { echo "## 🤖 Copilot Review"; echo; cat review.md; } > note.md
+          curl -sS --request POST \
+            --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
+            --data-urlencode "body@note.md" \
+            "https://gitlab.com/api/v4/projects/${PROJECT_ID}/merge_requests/${MR_IID}/notes"
