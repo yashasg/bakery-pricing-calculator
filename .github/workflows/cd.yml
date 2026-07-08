@@ -66,7 +66,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Skips when main had no commits since the last hourly run; manual dispatch always proceeds.
+  # Skips when main had no commits in the lookback window; manual dispatch always proceeds.
+  # Lookback is wider than the hourly cadence (3h, not 1h) because GitHub's own docs warn
+  # scheduled runs can be silently dropped under load (docs.github.com: "if the load is
+  # sufficiently high enough, some queued jobs may be dropped") — a wider window means a
+  # single dropped hourly firing still gets caught by the next successful one instead of
+  # silently missing a deploy.
   guard:
     name: Change-since-last-run check
     runs-on: ubuntu-latest
@@ -80,7 +85,7 @@ jobs:
           fi
           git clone --depth=50 --branch main \
             "https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/yashasg/bakery-pricing-calculator.git" repo
-          if [ -n "$(cd repo && git log --since='1 hour ago' --oneline)" ]; then
+          if [ -n "$(cd repo && git log --since='3 hours ago' --oneline)" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
