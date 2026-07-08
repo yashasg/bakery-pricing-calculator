@@ -3,13 +3,13 @@
 # Deploy all three files together to the mirror; local `uses: ./...` resolves them
 # from the same ref as this caller.
 # Required GitHub secrets: GITLAB_PAT, ASC_API_KEY_JSON (release + screenshots_and_metadata), MATCH_PASSWORD (release).
-# Hourly (:17, off the :00 congestion spike): beta from main, skipped when main had no new commits since the last run.
+# Hourly (:53, off the :00 congestion spike): beta from main, skipped when main had no new commits since the last run.
 
 name: CD
 
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "53 * * * *"
   workflow_dispatch:
     inputs:
       lane:
