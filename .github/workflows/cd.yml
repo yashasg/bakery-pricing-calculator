@@ -3,13 +3,13 @@
 # Deploy all three files together to the mirror; local `uses: ./...` resolves them
 # from the same ref as this caller.
 # Required GitHub secrets: GITLAB_PAT, ASC_API_KEY_JSON (release + screenshots_and_metadata), MATCH_PASSWORD (release).
-# Nightly: 09:00 UTC (02:00 PT) beta from main, skipped when main had no new commits in the last 24h.
+# Hourly (:17, off the :00 congestion spike): beta from main, skipped when main had no new commits since the last run.
 
 name: CD
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
     inputs:
       lane:
@@ -66,9 +66,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Nightly skips when main had no commits in the last 24h; manual dispatch always proceeds.
+  # Skips when main had no commits since the last hourly run; manual dispatch always proceeds.
   guard:
-    name: Nightly change check
+    name: Change-since-last-run check
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.check.outputs.changed }}
@@ -80,7 +80,7 @@ jobs:
           fi
           git clone --depth=50 --branch main \
             "https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/yashasg/bakery-pricing-calculator.git" repo
-          if [ -n "$(cd repo && git log --since='24 hours ago' --oneline)" ]; then
+          if [ -n "$(cd repo && git log --since='1 hour ago' --oneline)" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
