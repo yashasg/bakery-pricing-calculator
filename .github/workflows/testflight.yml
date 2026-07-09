@@ -73,6 +73,16 @@ jobs:
         working-directory: app
         run: bundle exec fastlane test
 
+      - name: Deploy CloudKit schema to Development
+        # Push current SchemaV4 to the CloudKit DEVELOPMENT environment via
+        # initializeCloudKitSchema (CloudKitSchemaInitTests). continue-on-error: a
+        # schema-push hiccup or CloudKit outage must never block a TestFlight upload.
+        # DEVELOPMENT only; the Dev -> Production promote stays a manual Console step.
+        if: ${{ !inputs.skip_tests }}
+        continue-on-error: true
+        working-directory: app
+        run: bundle exec fastlane cloudkit_init_dev
+
       - name: Upload via Fastlane lane
         working-directory: app
         env:
