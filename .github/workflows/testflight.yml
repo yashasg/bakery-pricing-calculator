@@ -73,6 +73,25 @@ jobs:
         working-directory: app
         run: bundle exec fastlane test
 
+      - name: Push CloudKit schema.ckdb to Development
+        # Applies the committed app/cloudkit-schema/schema.ckdb into CloudKit
+        # Development via `cktool import-schema` (fastlane cloudkit_schema
+        # mode:import). Pure CLI + management token, no Xcode signing/simulator
+        # involved (unlike the removed initializeCloudKitSchema push, which needs
+        # a real signed local build - see cloudkit_init_dev in the Fastfile).
+        # This step only re-applies what's already committed; deriving NEW
+        # fields from model changes still requires running cloudkit_init_dev
+        # locally first, then `cloudkit_schema mode:export`, then committing.
+        # continue-on-error: a schema-push hiccup or CloudKit outage must never
+        # block a TestFlight upload. Production stays a manual Console promote.
+        if: ${{ !inputs.skip_tests }}
+        continue-on-error: true
+        working-directory: app
+        env:
+          CLOUDKIT_MANAGEMENT_TOKEN: ${{ secrets.CLOUDKIT_MANAGEMENT_TOKEN }}
+          CLOUDKIT_TEAM_ID: "27ZY7536R5"
+        run: bundle exec fastlane cloudkit_schema mode:import
+
       - name: Upload via Fastlane lane
         working-directory: app
         env:
