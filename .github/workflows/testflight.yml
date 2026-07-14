@@ -139,7 +139,8 @@ jobs:
           git remote set-url origin "https://gitlab.com/${GITLAB_PROJECT}.git"
           export GIT_CONFIG_COUNT=1
           export GIT_CONFIG_KEY_0=http.extraHeader
-          export GIT_CONFIG_VALUE_0="Authorization: Basic $(printf 'gitlab-token:%s' "$GITLAB_PAT" | base64 | paste -sd '' -)"
+          GIT_CONFIG_VALUE_0="Authorization: Basic $(printf 'gitlab-token:%s' "$GITLAB_PAT" | base64 | paste -sd '' -)"
+          export GIT_CONFIG_VALUE_0
           remote_tag=$(git ls-remote --refs origin "refs/tags/$tag")
 
           if [[ -n "$remote_tag" ]]; then
