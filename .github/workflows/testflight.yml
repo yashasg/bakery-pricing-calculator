@@ -150,7 +150,17 @@ jobs:
               echo "::error::GitLab tag $tag points to $tagged_commit, not release commit $source_commit"
               exit 1
             }
-            echo "GitLab tag $tag already points to release commit $source_commit"
+            tag_type=$(git cat-file -t refs/release-tag-check)
+            [[ "$tag_type" == "tag" ]] || {
+              echo "::error::GitLab tag $tag is lightweight; expected an annotated release tag"
+              exit 1
+            }
+            tag_message=$(git cat-file tag refs/release-tag-check | sed '1,/^$/d')
+            [[ "$tag_message" == "$message" ]] || {
+              echo "::error::GitLab tag $tag annotation does not match expected message: $message"
+              exit 1
+            }
+            echo "GitLab tag $tag already points to release commit $source_commit with the expected annotation"
             exit 0
           fi
 
@@ -169,7 +179,17 @@ jobs:
             echo "::error::GitLab tag $tag was created concurrently for $tagged_commit, not $source_commit"
             exit 1
           }
-          echo "GitLab tag $tag was created concurrently for release commit $source_commit"
+          tag_type=$(git cat-file -t refs/release-tag-check)
+          [[ "$tag_type" == "tag" ]] || {
+            echo "::error::GitLab tag $tag was created concurrently as a lightweight tag"
+            exit 1
+          }
+          tag_message=$(git cat-file tag refs/release-tag-check | sed '1,/^$/d')
+          [[ "$tag_message" == "$message" ]] || {
+            echo "::error::GitLab tag $tag was created concurrently with an unexpected annotation; expected: $message"
+            exit 1
+          }
+          echo "GitLab tag $tag was created concurrently for release commit $source_commit with the expected annotation"
 
       - name: Save DerivedData cache
         if: always()
