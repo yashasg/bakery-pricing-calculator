@@ -112,6 +112,64 @@ jobs:
 
           bundle exec fastlane "${{ inputs.lane }}" "${fastlane_args[@]}"
 
+      - name: Tag successful App Store release in GitLab
+        if: ${{ inputs.lane == 'release' }}
+        env:
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          RELEASE_REF: ${{ inputs.ref }}
+          RELEASE_REF_TYPE: ${{ inputs.ref_type }}
+        run: |
+          set -euo pipefail
+
+          source_commit=$(git rev-parse HEAD)
+          archive_info=$(find app -path '*/Products/Applications/*.app/Info.plist' -print -quit)
+          [[ -n "$archive_info" ]] || { echo "::error::Release archive Info.plist not found"; exit 1; }
+
+          version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$archive_info")
+          build=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$archive_info")
+          tag="v$version"
+          message="Release $version (build $build)"
+          git check-ref-format "refs/tags/$tag" >/dev/null
+
+          if [[ "$RELEASE_REF_TYPE" == "tag" && "$RELEASE_REF" != "$tag" ]]; then
+            echo "::error::Release tag $RELEASE_REF does not match uploaded version tag $tag"
+            exit 1
+          fi
+
+          git remote set-url origin "https://gitlab.com/${GITLAB_PROJECT}.git"
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=http.extraHeader
+          export GIT_CONFIG_VALUE_0="Authorization: Basic $(printf 'gitlab-token:%s' "$GITLAB_PAT" | base64 | paste -sd '' -)"
+          remote_tag=$(git ls-remote --refs origin "refs/tags/$tag")
+
+          if [[ -n "$remote_tag" ]]; then
+            git fetch --quiet --force origin "refs/tags/$tag:refs/release-tag-check"
+            tagged_commit=$(git rev-list -n 1 refs/release-tag-check)
+            [[ "$tagged_commit" == "$source_commit" ]] || {
+              echo "::error::GitLab tag $tag points to $tagged_commit, not release commit $source_commit"
+              exit 1
+            }
+            echo "GitLab tag $tag already points to release commit $source_commit"
+            exit 0
+          fi
+
+          [[ "$RELEASE_REF_TYPE" != "tag" ]] || { echo "::error::Dispatched GitLab tag $tag no longer exists"; exit 1; }
+
+          git -c user.name="GitHub Actions" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            tag -a "$tag" "$source_commit" -m "$message"
+          if git push --quiet origin "refs/tags/$tag"; then
+            echo "Created GitLab tag $tag for $source_commit: $message"
+            exit 0
+          fi
+
+          git fetch --quiet --force origin "refs/tags/$tag:refs/release-tag-check"
+          tagged_commit=$(git rev-list -n 1 refs/release-tag-check)
+          [[ "$tagged_commit" == "$source_commit" ]] || {
+            echo "::error::GitLab tag $tag was created concurrently for $tagged_commit, not $source_commit"
+            exit 1
+          }
+          echo "GitLab tag $tag was created concurrently for release commit $source_commit"
+
       - name: Save DerivedData cache
         if: always()
         uses: yashasg/bakery-pricing-calculator/.github/actions/save-cache@main
