@@ -8,7 +8,6 @@ on:
       ref_type:     { required: false, type: string,  default: branch }
       notes:        { required: false, type: string,  default: "" }
       skip_tests:   { required: false, type: boolean, default: false }
-      version_bump: { required: false, type: string,  default: patch }
     # Secrets arrive via `secrets: inherit` from the caller (GITLAB_PAT, ASC_API_KEY_JSON, MATCH_PASSWORD).
 
 permissions:
@@ -30,12 +29,6 @@ jobs:
       TESTFLIGHT_NOTES: ${{ inputs.notes }}
 
     steps:
-      - name: Validate dispatch inputs
-        if: ${{ inputs.ref_type == 'tag' && inputs.version_bump != 'none' }}
-        run: |
-          echo "::error::version_bump must be 'none' when ref_type is 'tag' (tags are immutable refs)"
-          exit 1
-
       - name: Checkout from GitLab
         run: |
           git clone --depth 1 \
@@ -101,10 +94,6 @@ jobs:
           ASC_API_KEY_JSON: ${{ secrets.ASC_API_KEY_JSON }}
         run: |
           fastlane_args=()
-
-          if [[ "${{ inputs.version_bump }}" != "none" ]]; then
-            fastlane_args+=("bump:${{ inputs.version_bump }}")
-          fi
 
           if [[ -n "$TESTFLIGHT_NOTES" ]]; then
             fastlane_args+=("notes:$TESTFLIGHT_NOTES")
