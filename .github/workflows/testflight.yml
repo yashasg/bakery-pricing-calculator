@@ -25,6 +25,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
     env:
+      FASTLANE_TEAM_ID: ${{ vars.FASTLANE_TEAM_ID }}
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       TESTFLIGHT_NOTES: ${{ inputs.notes }}
 
