@@ -12,17 +12,23 @@ permissions:
   actions: read
 
 env:
-  XCODE_VERSION: "26"
+  XCODE_VERSION: "27.1"
   DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
   GITLAB_PROJECT: yashasg/bakery-pricing-calculator
 
 jobs:
   screenshots:
     name: ${{ inputs.lane == 'metadata' && 'Upload Metadata + Screenshots' || (inputs.lane == 'screenshots_and_metadata' && 'Screenshots + Metadata' || 'Capture Screenshots') }}
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 60
 
     steps:
+      - name: Select Xcode
+        run: |
+          export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+          xcodebuild -version
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+
       - name: Checkout from GitLab
         run: |
           git clone --depth 1 \
@@ -63,7 +69,7 @@ jobs:
           # one iPhone set + one iPad set covers the whole store. screenshot_devices()
           # honors this comma-separated list and keeps BOTH devices (unlike SIMULATOR_NAME,
           # which collapses to a single device and skips the iPad).
-          SCREENSHOT_DEVICES: "iPhone 17 Pro Max,iPad Pro 13-inch (M5)"
+          SCREENSHOT_DEVICES: "iPhone 18 Pro Max,iPad Pro 13-inch (M5)"
         run: |
           # Devices are pinned via SCREENSHOT_DEVICES above (App Store-required sizes).
           # Do NOT set SIMULATOR_NAME here: when set, the Fastfile screenshot_devices()

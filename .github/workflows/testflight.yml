@@ -15,14 +15,14 @@ permissions:
   actions: read
 
 env:
-  XCODE_VERSION: "26"
+  XCODE_VERSION: "27.1"
   DERIVED_DATA_PATH: ${{ github.workspace }}/build/app/xcode-derived-data
   GITLAB_PROJECT: yashasg/bakery-pricing-calculator
 
 jobs:
   testflight:
     name: ${{ inputs.lane == 'release' && 'App Store Release' || 'TestFlight' }}
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 60
     env:
       FASTLANE_TEAM_ID: ${{ vars.FASTLANE_TEAM_ID }}
@@ -30,6 +30,17 @@ jobs:
       TESTFLIGHT_NOTES: ${{ inputs.notes }}
 
     steps:
+      - name: Select Xcode and verify distribution SDK
+        run: |
+          export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+          xcodebuild -version
+          sdk_version="$(xcrun --sdk iphoneos --show-sdk-version)"
+          if [[ "${sdk_version%%.*}" -lt 27 ]]; then
+            echo "::error::iOS 27 SDK or newer is required; selected SDK is ${sdk_version}."
+            exit 1
+          fi
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+
       - name: Checkout from GitLab
         run: |
           git clone --depth 1 \
